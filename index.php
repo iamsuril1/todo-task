@@ -2,12 +2,22 @@
 session_start();
 include 'db_connect.php';
 
+if (!isset($_SESSION['user_id'])) {
+    $username = '';  // If not logged in, set an empty username
+} else {
+    // Fetch username of the logged-in user
+    $stmt = $pdo->prepare("SELECT username FROM users WHERE id = :user_id");
+    $stmt->execute(['user_id' => $_SESSION['user_id']]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $username = $user['username'];  // Assign the username to the variable
+}
+
 if (isset($_POST['login'])) {
-    $username = $_POST['username'];
+    $username_input = $_POST['username'];
     $password = $_POST['password'];
 
     $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username");
-    $stmt->execute(['username' => $username]);
+    $stmt->execute(['username' => $username_input]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
